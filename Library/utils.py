@@ -1,7 +1,5 @@
 import sys
 import struct
-from capstone import *
-from keystone import *
 import codecs
 
 class elf:
@@ -151,54 +149,6 @@ class patchtools:
                 print(codecs.encode(sc, 'hex'))
                 return False
         return True
-
-    def disasm(self, code, size):
-        cs = Cs(CS_ARCH_ARM64, CS_MODE_LITTLE_ENDIAN)
-        instr = []
-        for i in cs.disasm(code, size):
-            # print("0x%x:\t%s\t%s" % (i.address, i.mnemonic, i.op_str))
-            instr.append("%s\t%s" % (i.mnemonic, i.op_str))
-        return instr
-
-    def assembler(self, code):
-        ks = Ks(KS_ARCH_ARM64, KS_MODE_LITTLE_ENDIAN)
-        if self.bDebug:
-            try:
-                encoding, count = ks.asm(code)
-            except KsError as e:
-                print(e)
-                print(e.stat_count)
-                print(code[e.stat_count:e.stat_count + 10])
-                exit(0)
-                if self.bDebug:
-                    # walk every line to find the (first) error
-                    for idx, line in enumerate(code.splitlines()):
-                        print("%02d: %s" % (idx, line))
-                        if len(line) and line[0] != '.':
-                            try:
-                                encoding, count = ks.asm(line)
-                            except:
-                                print("bummer")
-                else:
-                    exit(0)
-        else:
-            encoding, count = ks.asm(code)
-
-        sc = ""
-        count = 0
-        out = ""
-        for i in encoding:
-            if self.cstyle:
-                out += ("\\x%02x" % i)
-            else:
-                out += ("%02x" % i)
-            sc += "%02x" % i
-
-            count += 1
-            # if bDebug and count % 4 == 0:
-            #    out += ("\n")
-
-        return out
 
     def find_binary(self,data,strf,pos=0):
         t=strf.split(b".")
